@@ -56,3 +56,6 @@ iv_model <- ivreg(iv_formula, data = data)
 
 # Summary of the model
 summary(iv_model)
+
+# Check F-stat (Yes they are fine)
+summary(iv_model, diagnostics = TRUE)
