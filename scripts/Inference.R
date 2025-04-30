@@ -25,12 +25,13 @@
 # hequity   : home equity (in US $)
 # hval      : home value (in US $)
 
+rm(list=ls())
 
-# install.packages("AER")
 # Load required package
 library(AER)
+library(here)
 
-data <- read.csv("401k.csv")
+data <- read.csv(here("data", "401k.csv"))
 
 # 2SLS formula using manual interaction terms (Formula apparently would work)
 iv_formula <- tw ~ p401 + a401 + tfa + net_tfa + nifa + net_nifa + net_n401 +

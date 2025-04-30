@@ -5,22 +5,15 @@
 
 ############################## ENVIRONMENT SETUP ##############################
 rm(list=ls())
-cat('\014')
 
 # Package Setup
-required_packages <- c("dplyr", "modelsummary", "AER")
-for (pkg in required_packages) {
-  if (!requireNamespace(pkg, quietly = TRUE)) {
-    install.packages(pkg)
-  }
-}
 library(dplyr)
 library(modelsummary)
 library(AER)
+library(here)
 
 ############################## READ IN DATA ##############################
-setwd("/Users/ericv/GT/ECON4161/Project/")
-df <- read.csv("401k.csv")
+df <- read.csv(here("data", "401k.csv"))
 
 ############################## DATA CATEGORICAL VARS ##############################
 inc_labels  <- c("<$10K","$10-20K","$20-30K","$30-40K","$40-50K","$50-75K",">$75K")
@@ -177,3 +170,7 @@ diff_df <- diff_df %>%
 ############################## PRINT COMPARISON DIFFERENCES ##############################
 print('Differences (Actual - Expected)')
 print(diff_df, row.names=FALSE)
+
+############################## SAVE DIFFERENCES ################################
+write.csv(results_df, here("report", "replication_results.csv"), row.names = F)
+write.csv(diff_df, here("report", "replication_differences.csv"), row.names = F)

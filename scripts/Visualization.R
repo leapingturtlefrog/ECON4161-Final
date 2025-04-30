@@ -1,21 +1,23 @@
-# install.packages("ggplot2")
+rm(list=ls())
+
 # import packages
 library(dplyr)
 library(ggplot2)
 library(cluster)
+library(ggcorrplot)
+library(here)
 
 # read data
-data <- read.csv("401k.csv")
+data <- read.csv(here("data", "401k.csv"))
 
 ################################################################################
 ### Distribution from PSet 1, switching net total assets for total wealth
-p401_density_plot <- ggplot(data, aes(x = tw, fill = as.factor(p401))) +
+p401_density_plot <- ggplot(data, aes(x = tw, fill = factor(p401,
+  labels = c("Nonparticipants", "Participants")))) +
   geom_density(alpha = 0.5) +
   labs(title = "Distribution of Total Wealth by 401(k) Participation",
        x = "Total Wealth", y = "Density", fill = "401(k) Participation") +
   theme_minimal()
-
-p401_density_plot
 
 ################################################################################
 ### Clustering
@@ -44,8 +46,6 @@ cluster_plot <- ggplot(pca_data, aes(x = PC1, y = PC2, color = cluster)) +
        y = "Principal Component 2") +
   theme_minimal() +
   scale_color_brewer(palette = "Set1")
-
-cluster_plot
 
 ################################################################################
 ### PCA Variance:
@@ -78,23 +78,33 @@ variance_explained_plot <-ggplot(pve_df[1:10, ], aes(x = PC)) +
     axis.title.y.right = element_text(color = "#ff7f0e")
   )
 
-variance_explained_plot
-
 ################################################################################
 ### Heatmap Correlation
 # Compute correlation matrix
 cor_matrix <- cor(vars, use = "pairwise.complete.obs")
 
-# Mask upper triangle and diagonal (duplicates & perfect correlation)
-cor_matrix[lower.tri(cor_matrix, diag = TRUE)] <- NA
-
 # Plot heatmap
-corr_heatmap <- heatmap(cor_matrix,
-        Colv = NA,
-        Rowv = NA,
-        scale = "none",
-        na.rm = TRUE,
-        margins = c(8, 8),
-        main = "Correlation Heatmap")
+cor_heatmap <- ggcorrplot(
+  cor_matrix,
+  type = "lower", # only lower triangle
+  lab = F,        # show correlation numbers
+  lab_size = 3,
+  colors = c("#d73027", "white", "#1a9850"),
+  title = "Correlation Heatmap",
+  ggtheme = theme_minimal()
+) + theme(axis.text.x = element_text(angle = 90, hjust = 0),
+          axis.text.y = element_text(angle = 0))
 
+# Save the ggplot2 plots
+plots <- list(
+  p401_density_plot = p401_density_plot,
+  cluster_plot = cluster_plot,
+  variance_explained_plot = variance_explained_plot,
+  cor_heatmap = cor_heatmap
+)
 
+for (name in names(plots)) {
+  plot <- plots[[name]]
+  ggsave(here("report", paste0(name, ".png")), plot = plot, width = 8, height = 6)
+  cat(paste0("Saved ", name, " to report/", name, ".png\n"))
+}
